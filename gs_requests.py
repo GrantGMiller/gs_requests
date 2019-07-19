@@ -56,4 +56,13 @@ class Response:
     def text(self):
         return self._raw.decode()
 
+    @property
+    def content(self):
+        return self._raw.decode()
+
+
+def get(*a, **k):
+    tempSession = HTTPSession()
+    return tempSession.get(*a, **k)
+
 
