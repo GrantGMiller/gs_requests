@@ -1,6 +1,10 @@
 import urllib.request
 import json
 
+DEBUG = False
+if DEBUG is False:
+    print = lambda *a, **k: None  # disable print statements
+
 
 class HTTPSession:
     def __init__(self):
@@ -64,5 +68,3 @@ class Response:
 def get(*a, **k):
     tempSession = HTTPSession()
     return tempSession.get(*a, **k)
-
-
