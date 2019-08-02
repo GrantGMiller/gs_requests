@@ -13,6 +13,7 @@ class HTTPSession:
 
         self._proxyAddress = None
         self._proxyPort = None
+        self._auth = tuple()
 
     def get(self, url, data=None, proxies=None):
         if proxies:
@@ -38,7 +39,14 @@ class HTTPSession:
         resp = self._opener.open(url, data=data)
         return Response(raw=resp.read())
 
-    def auth(self, username, password):
+    @property
+    def auth(self):
+        return self._auth
+
+    @auth.setter
+    def auth(self, authTuple):
+        self._auth = authTuple
+        username, password = authTuple
         authHandler = urllib.request.HTTPBasicAuthHandler()
         authHandler.add_password(None, '/', username, password)
         self._opener.add_handler(authHandler)
