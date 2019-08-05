@@ -1,4 +1,5 @@
 import urllib.request
+import urllib.parse
 import json
 
 DEBUG = False
@@ -16,6 +17,21 @@ class HTTPSession:
         self._auth = tuple()
 
     def get(self, url, data=None, proxies=None):
+        '''
+
+        :param url:
+        :param data: dict or None
+        :param proxies:
+        :return:
+        '''
+        if data:
+            if isinstance(data, dict):
+                data = urllib.parse.urlencode(data).encode()
+            elif isinstance(data, str):
+                data = data.encode()
+
+            print('29 data=', data)
+
         if proxies:
             proxyString = list(proxies.values())[0]
             self._proxyAddress = proxyString.split(':')[0].split('://')[-1]
@@ -39,6 +55,9 @@ class HTTPSession:
         resp = self._opener.open(url, data=data)
         return Response(raw=resp.read())
 
+    def post(self, *a, **k):
+        self.get(*a, **k)
+
     @property
     def auth(self):
         return self._auth
@@ -60,7 +79,6 @@ class Response:
     def raw(self):
         return self._raw
 
-    @property
     def json(self):
         return json.loads(self._raw)
 
