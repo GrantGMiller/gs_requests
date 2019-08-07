@@ -2,7 +2,7 @@ import urllib.request
 import urllib.parse
 import json
 
-DEBUG = False
+DEBUG = True
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
@@ -16,7 +16,7 @@ class HTTPSession:
         self._proxyPort = None
         self._auth = tuple()
 
-    def get(self, url, data=None, proxies=None, headers=None):
+    def get(self, url, data=None, proxies=None, headers=None, method=None):
         '''
 
         :param url:
@@ -24,7 +24,10 @@ class HTTPSession:
         :param proxies:
         :return:
         '''
+        self._DoRequest(url, data=data, proxies=proxies, headers=headers, method='GET')
 
+    def _DoRequest(self, url, data=None, proxies=None, headers=None, method=None):
+        print('gs_requests._DoRequest(', url, data, proxies, headers, method)
         if data:
             if isinstance(data, dict):
                 data = urllib.parse.urlencode(data).encode()
@@ -53,13 +56,13 @@ class HTTPSession:
             })
             self._opener.add_handler(proxyHandler)
 
-        req = urllib.request.Request(url, data=data, headers=headers or {})
+        req = urllib.request.Request(url, method=method, data=data, headers=headers or {})
 
         resp = self._opener.open(req)
         return Response(raw=resp.read())
 
-    def post(self, *a, **k):
-        self.get(*a, **k)
+    def post(self, url, data=None, proxies=None, headers=None, method=None):
+        self._DoRequest(url, data=data, proxies=proxies, headers=headers, method='POST')
 
     @property
     def auth(self):
