@@ -100,3 +100,8 @@ class Response:
 def get(*a, **k):
     tempSession = HTTPSession()
     return tempSession.get(*a, **k)
+
+
+def post(*a, **k):
+    tempSession = HTTPSession()
+    return tempSession.post(*a, **k)
