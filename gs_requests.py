@@ -16,7 +16,7 @@ class HTTPSession:
         self._proxyPort = None
         self._auth = tuple()
 
-    def get(self, url, data=None, proxies=None):
+    def get(self, url, data=None, proxies=None, headers=None):
         '''
 
         :param url:
@@ -24,6 +24,7 @@ class HTTPSession:
         :param proxies:
         :return:
         '''
+
         if data:
             if isinstance(data, dict):
                 data = urllib.parse.urlencode(data).encode()
@@ -52,7 +53,9 @@ class HTTPSession:
             })
             self._opener.add_handler(proxyHandler)
 
-        resp = self._opener.open(url, data=data)
+        req = urllib.request.Request(url, data=data, headers=headers or {})
+
+        resp = self._opener.open(req)
         return Response(raw=resp.read())
 
     def post(self, *a, **k):
