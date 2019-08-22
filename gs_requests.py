@@ -28,9 +28,12 @@ class HTTPSession:
 
     def _DoRequest(self, url, data=None, proxies=None, headers=None, method=None):
         print('gs_requests._DoRequest(', url, data, proxies, headers, method)
+        headers = headers or dict()
+
         if data:
             if isinstance(data, dict):
                 data = urllib.parse.urlencode(data).encode()
+                headers.update({'content-type': 'application/x-www-form-urlencoded'})
             elif isinstance(data, str):
                 data = data.encode()
 
@@ -56,13 +59,32 @@ class HTTPSession:
             })
             self._opener.add_handler(proxyHandler)
 
-        req = urllib.request.Request(url, method=method, data=data, headers=headers or {})
+        req = urllib.request.Request(url, method=method, data=data, headers=headers)
+        self._printObj(req)
+        try:
+            resp = self._opener.open(req)
+            return Response(raw=resp.read())
+        except Exception as e:
+            self._printObj(e)
+            raise e
 
-        resp = self._opener.open(req)
-        return Response(raw=resp.read())
+    @staticmethod
+    def _printObj(obj):
+        try:
+            print('69 obj.info()=', obj.info())
+        except:
+            pass
+
+        for item in dir(obj):
+            try:
+                print(item, '=', getattr(obj, item))
+            except:
+                print(item)
+
 
     def post(self, url, data=None, proxies=None, headers=None, method=None):
-        self._DoRequest(url, data=data, proxies=proxies, headers=headers, method='POST')
+        resp = self._DoRequest(url, data=data, proxies=proxies, headers=headers, method='POST')
+        return resp
 
     @property
     def auth(self):
