@@ -16,18 +16,10 @@ class HTTPSession:
         self._proxyPort = None
         self._auth = tuple()
 
-    def get(self, url, data=None, proxies=None, headers=None, method=None):
-        '''
-
-        :param url:
-        :param data: dict or None
-        :param proxies:
-        :return:
-        '''
-        self._DoRequest(url, data=data, proxies=proxies, headers=headers, method='GET')
-
-    def _DoRequest(self, url, data=None, proxies=None, headers=None, method=None):
-        print('gs_requests._DoRequest(', url, data, proxies, headers, method)
+    def _DoRequest(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None):
+        print('gs_requests._DoRequest(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}'.format(
+            url, data, proxies, headers, method, params, json
+        ))
         headers = headers or dict()
 
         if data:
@@ -38,6 +30,9 @@ class HTTPSession:
                 data = data.encode()
 
             print('29 data=', data)
+
+        if json:
+            data = json.dumps(json, indent=2, sort_keys=True)
 
         if proxies:
             proxyString = list(proxies.values())[0]
@@ -59,12 +54,29 @@ class HTTPSession:
             })
             self._opener.add_handler(proxyHandler)
 
+        if params:
+            url += '?'
+            if isinstance(params, str):
+                url += params
+            elif isinstance(params, dict):
+                url += urllib.parse.urlencode(params)
+
+        if headers:
+            if 'Accept-Encoding' in headers:
+                if 'gzip' in headers['Accept-Encoding']:
+                    # nope
+                    headers.pop('Accept-Encoding')
+
+        print('urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
+            url, method, data, headers
+        ))
         req = urllib.request.Request(url, method=method, data=data, headers=headers)
-        self._printObj(req)
+        # self._printObj(req)
         try:
             resp = self._opener.open(req)
-            return Response(raw=resp.read())
+            return Response(raw=resp.read(), code=resp.code)
         except Exception as e:
+            print('79 Error', e)
             self._printObj(e)
             raise e
 
@@ -81,9 +93,19 @@ class HTTPSession:
             except:
                 print(item)
 
+    def get(self, *a, **k):
+        k['method'] = 'GET'
+        resp = self._DoRequest(*a, **k)
+        return resp
 
-    def post(self, url, data=None, proxies=None, headers=None, method=None):
-        resp = self._DoRequest(url, data=data, proxies=proxies, headers=headers, method='POST')
+    def post(self, *a, **k):
+        k['method'] = 'POST'
+        resp = self._DoRequest(*a, **k)
+        return resp
+
+    def put(self, *a, **k):
+        k['method'] = 'PUT'
+        resp = self._DoRequest(*a, **k)
         return resp
 
     @property
@@ -99,9 +121,14 @@ class HTTPSession:
         self._opener.add_handler(authHandler)
 
 
+class Session(HTTPSession):
+    pass
+
+
 class Response:
-    def __init__(self, raw):
+    def __init__(self, raw, code):
         self._raw = raw
+        self._code = code
 
     @property
     def raw(self):
@@ -118,6 +145,10 @@ class Response:
     def content(self):
         return self._raw.decode()
 
+    @property
+    def status_code(self):
+        return self._code
+
 
 def get(*a, **k):
     tempSession = HTTPSession()
@@ -127,3 +158,10 @@ def get(*a, **k):
 def post(*a, **k):
     tempSession = HTTPSession()
     return tempSession.post(*a, **k)
+
+
+class Exceptions:
+    RequestException = IOError
+
+
+exceptions = Exceptions()
