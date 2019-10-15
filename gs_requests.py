@@ -65,15 +65,18 @@ class HTTPSession:
             if 'Accept-Encoding' in headers:
                 if 'gzip' in headers['Accept-Encoding']:
                     # nope
-                    headers.pop('Accept-Encoding')
-
+                    # headers.pop('Accept-Encoding')
+            
+            pass
         print('urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
             url, method, data, headers
         ))
         req = urllib.request.Request(url, method=method, data=data, headers=headers)
         # self._printObj(req)
+        print('req=', req.full_url, req.method, req.headers)
         try:
             resp = self._opener.open(req)
+            print('resp.code=', resp.code)
             return Response(raw=resp.read(), code=resp.code)
         except Exception as e:
             print('79 Error', e)
@@ -127,6 +130,7 @@ class Session(HTTPSession):
 
 class Response:
     def __init__(self, raw, code):
+        print('Response.__init__(', raw, code)
         self._raw = raw
         self._code = code
 
