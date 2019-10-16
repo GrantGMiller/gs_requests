@@ -1,3 +1,7 @@
+'''
+This module was writted to duplicate the functions of the python-requests package to run on GS.
+'''
+
 import urllib.request
 import urllib.parse
 import json
