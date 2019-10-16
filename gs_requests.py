@@ -62,12 +62,8 @@ class HTTPSession:
                 url += urllib.parse.urlencode(params)
 
         if headers:
-            if 'Accept-Encoding' in headers:
-                if 'gzip' in headers['Accept-Encoding']:
-                    # nope
-                    # headers.pop('Accept-Encoding')
-            
             pass
+        
         print('urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
             url, method, data, headers
         ))
