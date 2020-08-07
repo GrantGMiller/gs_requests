@@ -67,13 +67,14 @@ class HTTPSession:
 
         if headers:
             pass
-        
+
         print('urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
             url, method, data, headers
         ))
         req = urllib.request.Request(url, method=method, data=data, headers=headers)
         # self._printObj(req)
         print('req=', req.full_url, req.method, req.headers)
+        resp = None
         try:
             resp = self._opener.open(req)
             print('resp.code=', resp.code)
@@ -81,7 +82,10 @@ class HTTPSession:
         except Exception as e:
             print('79 Error', e)
             self._printObj(e)
-            raise e
+            if resp:
+                return Response(raw=resp.read(), code=resp.code)
+            else:
+                return Response(raw=e.args, code=400)
 
     @staticmethod
     def _printObj(obj):
@@ -89,12 +93,6 @@ class HTTPSession:
             print('69 obj.info()=', obj.info())
         except:
             pass
-
-        for item in dir(obj):
-            try:
-                print(item, '=', getattr(obj, item))
-            except:
-                print(item)
 
     def get(self, *a, **k):
         k['method'] = 'GET'
@@ -139,7 +137,11 @@ class Response:
         return self._raw
 
     def json(self):
-        return json.loads(self._raw)
+        if isinstance(self._raw, bytes):
+            raw = self._raw.decode()
+        else:
+            raw = self._raw
+        return json.loads(raw)
 
     @property
     def text(self):
@@ -152,6 +154,10 @@ class Response:
     @property
     def status_code(self):
         return self._code
+
+    @property
+    def ok(self):
+        return 200 <= self._code < 300
 
 
 def get(*a, **k):
