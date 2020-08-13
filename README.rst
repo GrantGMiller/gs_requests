@@ -95,7 +95,7 @@ Proxy
 Self Signed Certificates
 --------------------------------
 
-Pass the verify=False parameter to ignore certificate validation errors.
+Pass the *verify=False* parameter to ignore certificate validation errors.
 
 ::
 
