@@ -8,7 +8,7 @@ import json
 from extronlib.system import GetUnverifiedContext
 import base64
 
-DEBUG = True
+DEBUG = False
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
