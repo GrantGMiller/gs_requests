@@ -4,19 +4,18 @@ This module was writted to duplicate the functions of the python-requests packag
 
 import urllib.request
 import urllib.parse
-import json
-from extronlib.system import GetUnverifiedContext
+import json as stdlib_json
 import base64
 
-DEBUG = False
+DEBUG = True
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
 
 class HTTPSession:
     def __init__(self):
-        cookieHandler = urllib.request.HTTPCookieProcessor()
-        self._opener = urllib.request.build_opener(cookieHandler)
+        self._cookieHandler = urllib.request.HTTPCookieProcessor()
+        self._opener = urllib.request.build_opener(self._cookieHandler)
 
         self._proxyAddress = None
         self._proxyPort = None
@@ -44,30 +43,22 @@ class HTTPSession:
             print('29 data=', data)
 
         if json:
-            data = json.dumps(json, indent=2, sort_keys=True)
+            data = stdlib_json.dumps(json, indent=2, sort_keys=True).encode()
 
         if proxies:
-            proxyString = list(proxies.values())[0]
-            self._proxyAddress = proxyString.split(':')[0].split('://')[-1]
-            try:
-                self._proxyPort = int(proxyString.split(':')[1])
-            except:
-                self._proxyPort = None
+            '''
+            proxies should be in the form
+            {"http": "http://admin:extron@192.168.68.109:8080", "https": "https://admin:extron@192.168.68.109:8080"}
+            or
+            {"http": "http://192.168.68.109:8080", "https": "https://192.168.68.109:8080"}
+            '''
 
-            proxyHandler = urllib.request.ProxyHandler({
-                'http': 'http://{}:{}'.format(
-                    self._proxyAddress,
-                    self._proxyPort or '3128',  # default proxies port is 3128
-                ),
-                'https': 'https://{}:{}'.format(
-                    self._proxyAddress,
-                    self._proxyPort or '3128',  # default proxies port is 3128
-                ),
-            })
+            proxyHandler = urllib.request.ProxyHandler(proxies)
             self._opener.add_handler(proxyHandler)
 
         if params:
-            url += '?'
+            if not url.endswith('?'):
+                url += '?'
             if isinstance(params, str):
                 url += params
             elif isinstance(params, dict):
@@ -81,6 +72,7 @@ class HTTPSession:
         ))
 
         if verify is False:
+            from extronlib.system import GetUnverifiedContext
             context = GetUnverifiedContext()
             httpsHandler = urllib.request.HTTPSHandler(context=context)
             self._opener.add_handler(httpsHandler)
@@ -94,7 +86,6 @@ class HTTPSession:
         try:
             resp = self._opener.open(req)
             print('resp.code=', resp.code)
-            self.headers.update(dict(resp.headers))
             return Response(raw=resp.read(), code=resp.code)
         except Exception as e:
             print('79 Error', e, ', resp=', resp)
@@ -106,7 +97,7 @@ class HTTPSession:
                 #     pass
                 #     #raise e
                 # else:
-                    return Response(raw=e.read(), code=e.code)
+                return Response(raw=e.read(), code=e.code)
 
     @staticmethod
     def _printObj(obj):
@@ -145,6 +136,10 @@ class HTTPSession:
         )
         self.headers['Authorization'] = headerValue
 
+    @property
+    def cookies(self):
+        return self._cookieHandler.cookiejar
+
 
 class Session(HTTPSession):
     pass
@@ -169,7 +164,7 @@ class Response:
             raw = self._raw.decode()
         else:
             raw = self._raw
-        return json.loads(raw)
+        return stdlib_json.loads(raw)
 
     @property
     def text(self):
