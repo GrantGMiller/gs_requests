@@ -87,8 +87,8 @@ Proxy
     resp = session.get(
         url='https://postman-echo.com/get?foo1=bar1&foo2=bar2',
         proxies={
-            'https': '192.168.254.254:3128',  # no proxy authentication
-            'http': 'admin:password@192.168.254.254:3128',  # with proxy authentication
+            'https': 'https://192.168.254.254:3128',  # no proxy authentication
+            'http': 'http://admin:password@192.168.254.254:3128',  # with proxy authentication
         })
     print('resp.text=', resp.text)
 
