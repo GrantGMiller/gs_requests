@@ -5,6 +5,8 @@ This module was writted to duplicate the functions of the python-requests packag
 import urllib.request
 import urllib.parse
 import json
+from extronlib.system import GetUnverifiedContext
+import base64
 
 DEBUG = True
 if DEBUG is False:
@@ -20,11 +22,17 @@ class HTTPSession:
         self._proxyPort = None
         self._auth = tuple()
 
-    def _DoRequest(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None):
-        print('gs_requests._DoRequest(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}'.format(
-            url, data, proxies, headers, method, params, json
-        ))
-        headers = headers or dict()
+        self.headers = {}
+
+    def request(self, *a, **k):
+        return self.Request(*a, **k)
+
+    def Request(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None, verify=True):
+        print(
+            'gs_requests.Request(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}, verify={}'.format(
+                url, data, proxies, headers, method, params, json, verify
+            ))
+        headers = headers or self.headers
 
         if data:
             if isinstance(data, dict):
@@ -71,42 +79,57 @@ class HTTPSession:
         print('urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
             url, method, data, headers
         ))
-        req = urllib.request.Request(url, method=method, data=data, headers=headers)
+
+        if verify is False:
+            context = GetUnverifiedContext()
+            httpsHandler = urllib.request.HTTPSHandler(context=context)
+            self._opener.add_handler(httpsHandler)
+        else:
+            context = None
+
+        req = urllib.request.Request(url, method=method, data=data, headers=headers, )
         # self._printObj(req)
         print('req=', req.full_url, req.method, req.headers)
         resp = None
         try:
             resp = self._opener.open(req)
             print('resp.code=', resp.code)
+            self.headers.update(dict(resp.headers))
             return Response(raw=resp.read(), code=resp.code)
         except Exception as e:
-            print('79 Error', e)
-            self._printObj(e)
+            print('79 Error', e, ', resp=', resp)
+            # self._printObj(e)
             if resp:
                 return Response(raw=resp.read(), code=resp.code)
             else:
-                return Response(raw=e.args, code=400)
+                # if len(e.args) == 0:
+                #     pass
+                #     #raise e
+                # else:
+                    return Response(raw=e.read(), code=e.code)
 
     @staticmethod
     def _printObj(obj):
         try:
             print('69 obj.info()=', obj.info())
+            print('obj.reason=', obj.reason)
+            print('obj.read=', obj.read())
         except:
-            pass
+            print('69 except obj=', obj)
 
     def get(self, *a, **k):
         k['method'] = 'GET'
-        resp = self._DoRequest(*a, **k)
+        resp = self.Request(*a, **k)
         return resp
 
     def post(self, *a, **k):
         k['method'] = 'POST'
-        resp = self._DoRequest(*a, **k)
+        resp = self.Request(*a, **k)
         return resp
 
     def put(self, *a, **k):
         k['method'] = 'PUT'
-        resp = self._DoRequest(*a, **k)
+        resp = self.Request(*a, **k)
         return resp
 
     @property
@@ -117,12 +140,17 @@ class HTTPSession:
     def auth(self, authTuple):
         self._auth = authTuple
         username, password = authTuple
-        authHandler = urllib.request.HTTPBasicAuthHandler()
-        authHandler.add_password(None, '/', username, password)
-        self._opener.add_handler(authHandler)
+        headerValue = 'Basic {}'.format(
+            base64.b64encode('{}:{}'.format(username, password).encode()).decode()
+        )
+        self.headers['Authorization'] = headerValue
 
 
 class Session(HTTPSession):
+    pass
+
+
+class session(HTTPSession):
     pass
 
 
@@ -145,6 +173,7 @@ class Response:
 
     @property
     def text(self):
+        print('self._raw=', self._raw)
         return self._raw.decode()
 
     @property
@@ -158,6 +187,10 @@ class Response:
     @property
     def ok(self):
         return 200 <= self._code < 300
+
+    @property
+    def reason(self):
+        return self._code
 
 
 def get(*a, **k):
@@ -175,3 +208,25 @@ class Exceptions:
 
 
 exceptions = Exceptions()
+
+
+class Auth:
+    def __init__(self):
+        self.username = None
+        self.password = None
+
+    def HTTPBasicAuth(self, username, password):
+        self.username = username
+        self.password = password
+        return self.username, self.password
+
+
+auth = Auth()
+
+if __name__ == '__main__':
+    s = Session()
+    s.headers['testkey'] = 'testvalue'
+    resp = s.get('https://www.extron.com')
+    s.request('https://www.extron.com')
+    print('resp.text=', resp.text)
+    print('s.headers=', s.headers)
