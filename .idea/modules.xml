@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../tcp-connection-handler/.idea/connection-handler.iml" filepath="$PROJECT_DIR$/../tcp-connection-handler/.idea/connection-handler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../extronlib-clone/.idea/extronlib-clone.iml" filepath="$PROJECT_DIR$/../extronlib-clone/.idea/extronlib-clone.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/gs_requests.iml" filepath="$PROJECT_DIR$/.idea/gs_requests.iml" />
     </modules>
   </component>

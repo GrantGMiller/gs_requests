@@ -4,5 +4,7 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Pipenv (gs_requests)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="extronlib-clone" />
+    <orderEntry type="module" module-name="connection-handler" />
   </component>
 </module>

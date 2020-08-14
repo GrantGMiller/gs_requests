@@ -7,7 +7,7 @@ import urllib.parse
 import json as stdlib_json
 import base64
 
-DEBUG = False
+DEBUG = True
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
@@ -17,6 +17,7 @@ class HTTPSession:
         self._cookieHandler = urllib.request.HTTPCookieProcessor()
         self._opener = urllib.request.build_opener(self._cookieHandler)
 
+        self._proxyHandler = None
         self._proxyAddress = None
         self._proxyPort = None
         self._auth = tuple()
@@ -26,10 +27,10 @@ class HTTPSession:
     def request(self, *a, **k):
         return self.Request(*a, **k)
 
-    def Request(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None, verify=True):
+    def Request(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None, verify=True, timeout=None):
         print(
-            'gs_requests.Request(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}, verify={}'.format(
-                url, data, proxies, headers, method, params, json, verify
+            'gs_requests.Request(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}, verify={}, timeout={}'.format(
+                url, data, proxies, headers, method, params, json, verify, timeout
             ))
         headers = headers or self.headers
 
@@ -53,8 +54,8 @@ class HTTPSession:
             {"http": "http://192.168.68.109:8080", "https": "https://192.168.68.109:8080"}
             '''
 
-            proxyHandler = urllib.request.ProxyHandler(proxies)
-            self._opener.add_handler(proxyHandler)
+            self._proxyHandler = urllib.request.ProxyHandler(proxies)
+            self._opener.add_handler(self._proxyHandler)
 
         if params:
             if not url.endswith('?'):
@@ -75,38 +76,33 @@ class HTTPSession:
             from extronlib.system import GetUnverifiedContext
             context = GetUnverifiedContext()
             httpsHandler = urllib.request.HTTPSHandler(context=context)
-            self._opener.add_handler(httpsHandler)
+            # for some reason UnverifiedContext only works with urllib.request.build_opener and not with add_handler
+            self._opener = urllib.request.build_opener(httpsHandler)
+            if self._proxyHandler:
+                self._opener.add_handler(self._proxyHandler)
+            if self._cookieHandler:
+                self._opener.add_handler(self._cookieHandler)
         else:
             context = None
 
-        req = urllib.request.Request(url, method=method, data=data, headers=headers, )
-        # self._printObj(req)
+        req = urllib.request.Request(url, method=method, data=data, headers=headers)
+
         print('req=', req.full_url, req.method, req.headers)
         resp = None
         try:
-            resp = self._opener.open(req)
+            resp = self._opener.open(req, timeout=timeout)
             print('resp.code=', resp.code)
             return Response(raw=resp.read(), code=resp.code)
         except Exception as e:
             print('79 Error', e, ', resp=', resp)
-            # self._printObj(e)
             if resp:
                 return Response(raw=resp.read(), code=resp.code)
             else:
-                # if len(e.args) == 0:
-                #     pass
-                #     #raise e
-                # else:
-                return Response(raw=e.read(), code=e.code)
-
-    @staticmethod
-    def _printObj(obj):
-        try:
-            print('69 obj.info()=', obj.info())
-            print('obj.reason=', obj.reason)
-            print('obj.read=', obj.read())
-        except:
-            print('69 except obj=', obj)
+                try:
+                    return Response(raw=e.read(), code=e.code)
+                except Exception as e2:
+                    print(e)
+                    return Response(raw=str(e).encode(), code=400)
 
     def get(self, *a, **k):
         k['method'] = 'GET'

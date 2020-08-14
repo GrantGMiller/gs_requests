@@ -38,6 +38,8 @@ You can do simple get/post requests like so:
         url='https://postman-echo.com/get',
         params={'key1': 'value1', 'key2': 'value2'}
     )
+    print('resp.text=', resp.text)
+    print('resp.json=', resp.json())
 
     resp = requests.post(
         url='https://postman-echo.com/post',
