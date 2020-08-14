@@ -7,7 +7,7 @@ import urllib.parse
 import json as stdlib_json
 import base64
 
-DEBUG = True
+DEBUG = False
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
