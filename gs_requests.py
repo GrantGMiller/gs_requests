@@ -22,6 +22,8 @@ class HTTPSession:
         self._proxyPort = None
         self._auth = tuple()
 
+        self._httpsHandler = None
+
         self.headers = {}
 
     def request(self, *a, **k):
@@ -75,13 +77,14 @@ class HTTPSession:
         if verify is False:
             from extronlib.system import GetUnverifiedContext
             context = GetUnverifiedContext()
-            httpsHandler = urllib.request.HTTPSHandler(context=context)
-            # for some reason UnverifiedContext only works with urllib.request.build_opener and not with add_handler
-            self._opener = urllib.request.build_opener(httpsHandler)
-            if self._proxyHandler:
-                self._opener.add_handler(self._proxyHandler)
-            if self._cookieHandler:
-                self._opener.add_handler(self._cookieHandler)
+            if self._httpsHandler is None:
+                self._httpsHandler = urllib.request.HTTPSHandler(context=context)
+                # for some reason UnverifiedContext only works with urllib.request.build_opener and not with add_handler
+                self._opener = urllib.request.build_opener(self._httpsHandler)
+                if self._proxyHandler:
+                    self._opener.add_handler(self._proxyHandler)
+                if self._cookieHandler:
+                    self._opener.add_handler(self._cookieHandler)
         else:
             context = None
 

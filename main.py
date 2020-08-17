@@ -58,7 +58,7 @@ except Exception as e:
 
 session = requests.Session()
 session.auth = ('admin', 'extron')
-resp = session.get('https://expired.badssl.com/', verify=False)
+resp = session.get('https://self-signed.badssl.com/', verify=False)
 print('resp.text=', resp.text)
 
 ###################################################################
