@@ -153,6 +153,7 @@ class Response:
         print('Response.__init__(', raw, code)
         self._raw = raw
         self._code = code
+        self._headers = {}
 
     @property
     def raw(self):
