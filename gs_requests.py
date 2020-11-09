@@ -29,7 +29,8 @@ class HTTPSession:
     def request(self, *a, **k):
         return self.Request(*a, **k)
 
-    def Request(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None, verify=True, timeout=None):
+    def Request(self, url, data=None, proxies=None, headers=None, method=None, params=None, json=None, verify=True,
+                timeout=None):
         print(
             'gs_requests.Request(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}, verify={}, timeout={}'.format(
                 url, data, proxies, headers, method, params, json, verify, timeout
@@ -196,6 +197,14 @@ def get(*a, **k):
 def post(*a, **k):
     tempSession = HTTPSession()
     return tempSession.post(*a, **k)
+
+
+def request(*a, **k):
+    method = k.pop('method', '').lower()
+    if method == 'get':
+        return get(*a, **k)
+    elif method == 'post':
+        return post(*a, **k)
 
 
 class Exceptions:
