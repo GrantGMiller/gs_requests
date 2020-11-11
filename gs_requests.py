@@ -48,6 +48,7 @@ class HTTPSession:
 
         if json:
             data = stdlib_json.dumps(json, indent=2, sort_keys=True).encode()
+            headers.update({'content-type': 'application/json'})
 
         if proxies:
             '''
@@ -120,6 +121,11 @@ class HTTPSession:
 
     def put(self, *a, **k):
         k['method'] = 'PUT'
+        resp = self.Request(*a, **k)
+        return resp
+
+    def patch(self, *a, **k):
+        k['method'] = 'PATCH'
         resp = self.Request(*a, **k)
         return resp
 
@@ -197,6 +203,10 @@ def get(*a, **k):
 def post(*a, **k):
     tempSession = HTTPSession()
     return tempSession.post(*a, **k)
+
+
+def patch(*a, **k):
+    return HTTPSession().patch(*a, **k)
 
 
 def request(*a, **k):
