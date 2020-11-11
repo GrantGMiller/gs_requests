@@ -200,11 +200,7 @@ def post(*a, **k):
 
 
 def request(*a, **k):
-    method = k.pop('method', '').lower()
-    if method == 'get':
-        return get(*a, **k)
-    elif method == 'post':
-        return post(*a, **k)
+    return HTTPSession().request(*a, **k)
 
 
 class Exceptions:
