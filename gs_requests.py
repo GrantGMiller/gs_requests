@@ -194,6 +194,9 @@ class Response:
     def reason(self):
         return self._code
 
+    def __str__(self):
+        return '<gs_requests.Response: code={}, headers={}>'.format(self._code, self._headers)
+
 
 def get(*a, **k):
     tempSession = HTTPSession()
