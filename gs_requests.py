@@ -36,6 +36,7 @@ class HTTPSession:
                 url, data, proxies, headers, method, params, json, verify, timeout
             ))
         headers = headers or self.headers
+        method = method.upper() if method else 'GET'
 
         if data:
             if isinstance(data, dict):
