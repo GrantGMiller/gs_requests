@@ -7,7 +7,7 @@ import urllib.parse
 import json as stdlib_json
 import base64
 
-DEBUG = False
+DEBUG = True
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
@@ -100,7 +100,7 @@ class HTTPSession:
             print('resp.code=', resp.code)
             return Response(raw=resp.read(), code=resp.code)
         except Exception as e:
-            print('79 Error', e, ', resp=', resp)
+            print('79 Error', e, ', resp=', resp, e.args)
             if resp:
                 return Response(raw=resp.read(), code=resp.code)
             else:
