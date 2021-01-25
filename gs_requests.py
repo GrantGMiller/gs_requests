@@ -35,6 +35,7 @@ class HTTPSession:
             'gs_requests.Request(url={}, data={}, proxies={}, headers={}, method={}, params={}, json={}, verify={}, timeout={}'.format(
                 url, data, proxies, headers, method, params, json, verify, timeout
             ))
+
         headers = headers or self.headers
         method = method.upper() if method else 'GET'
 
@@ -63,17 +64,19 @@ class HTTPSession:
             self._opener.add_handler(self._proxyHandler)
 
         if params:
+            print('67 url=', url)
             if not url.endswith('?'):
                 url += '?'
+
             if isinstance(params, str):
                 url += params
             elif isinstance(params, dict):
                 url += urllib.parse.urlencode(params)
-
+                print('74 url=', url)
         if headers:
             pass
 
-        print('urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
+        print('77 urllib.request.Request(url={}, method={}, data={}, headers={}'.format(
             url, method, data, headers
         ))
 
@@ -91,9 +94,10 @@ class HTTPSession:
         else:
             context = None
 
+        print('97 url=', url)
         req = urllib.request.Request(url, method=method, data=data, headers=headers)
 
-        print('req=', req.full_url, req.method, req.headers)
+        print('100 req=', req.full_url, req.method, req.headers)
         resp = None
         try:
             resp = self._opener.open(req, timeout=timeout)
