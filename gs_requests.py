@@ -7,6 +7,8 @@ import urllib.parse
 import json as stdlib_json
 import base64
 
+from extronlib.system import ProgramLog
+
 DEBUG = False
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
@@ -176,6 +178,7 @@ class Response:
             raw = self._raw.decode()
         else:
             raw = self._raw
+
         return stdlib_json.loads(raw)
 
     @property
