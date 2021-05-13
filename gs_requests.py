@@ -7,9 +7,9 @@ import urllib.parse
 import json as stdlib_json
 import base64
 
-from extronlib.system import ProgramLog
+from extronlib.system import ProgramLog, File
 
-DEBUG = False
+DEBUG = True
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
@@ -45,10 +45,17 @@ class HTTPSession:
             if isinstance(data, dict):
                 data = urllib.parse.urlencode(data).encode()
                 headers.update({'content-type': 'application/x-www-form-urlencoded'})
+
             elif isinstance(data, str):
                 data = data.encode()
 
-            print('29 data=', data)
+            elif isinstance(data, File):
+                data = data.read()
+
+            else:
+                raise TypeError('Unrecognized type "{}".'.format(type(data)))
+
+            print('29 data=', data[:100], '...')
 
         if json:
             data = stdlib_json.dumps(json, indent=2, sort_keys=True).encode()
