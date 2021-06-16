@@ -55,7 +55,7 @@ class HTTPSession:
             else:
                 raise TypeError('Unrecognized type "{}".'.format(type(data)))
 
-            print('29 data=', data[:100], '...')
+            print('29 data=', data[:1000], '...')
 
         if json:
             data = stdlib_json.dumps(json, indent=2, sort_keys=True).encode()
