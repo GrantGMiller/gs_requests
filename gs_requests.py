@@ -9,7 +9,7 @@ import base64
 
 from extronlib.system import ProgramLog, File
 
-DEBUG = True
+DEBUG = False
 if DEBUG is False:
     print = lambda *a, **k: None  # disable print statements
 
