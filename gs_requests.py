@@ -1,5 +1,6 @@
 '''
 This module was writted to duplicate the functions of the python-requests package to run on GS.
+More info here: https://github.com/GrantGMiller/gs_requests
 '''
 
 import urllib.request
