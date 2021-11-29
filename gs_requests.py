@@ -111,7 +111,7 @@ class HTTPSession:
         try:
             resp = self._opener.open(req, timeout=timeout)
             print('resp.code=', resp.code)
-            return Response(raw=resp.read(), code=resp.code)
+            return Response(raw=resp.read(), code=resp.code, headers=resp.headers)
         except Exception as e:
             print('79 Error', e, ', resp=', resp, e.args)
             if resp:
@@ -170,11 +170,11 @@ class session(HTTPSession):
 
 
 class Response:
-    def __init__(self, raw, code):
+    def __init__(self, raw, code, headers=None):
         print('Response.__init__(', raw, code)
         self._raw = raw
         self._code = code
-        self._headers = {}
+        self.headers = headers or {}
 
     @property
     def raw(self):
@@ -186,7 +186,10 @@ class Response:
         else:
             raw = self._raw
 
-        return stdlib_json.loads(raw)
+        try:
+            return stdlib_json.loads(raw)
+        except Exception as e:
+            return None # this request is not a JSON string
 
     @property
     def text(self):
@@ -210,7 +213,7 @@ class Response:
         return self._code
 
     def __str__(self):
-        return '<gs_requests.Response: code={}, headers={}>'.format(self._code, self._headers)
+        return '<gs_requests.Response: code={}, headers={}>'.format(self._code, str(self.headers).encode())
 
 
 def get(*a, **k):
