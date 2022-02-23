@@ -129,7 +129,6 @@ class HTTPSession:
             )
         except Exception as e:
             self.print('79 Error', e, ', resp=', resp, e.args)
-            print('type(e.headers)=', type(e.headers))
             if resp:
                 return Response(raw=resp.read(), code=resp.code, headers=resp.headers)
             else:
